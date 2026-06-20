@@ -1,0 +1,279 @@
+[
+  {
+    "question_id": "DEV_REG_001",
+    "question": "When did the Malaysian Aviation Consumer Protection Code 2016 come into operation?",
+    "category": "direct_regulatory_lookup",
+    "difficulty": "easy",
+    "answerable": true,
+    "expected_answer": "The Code came into operation on 1 July 2016.",
+    "required_facts": [
+      "Effective date was 1 July 2016."
+    ],
+    "gold_document_ids": [
+      "macpc_principal_2016"
+    ],
+    "gold_pages": {
+      "macpc_principal_2016": [39]
+    },
+    "effective_date_context": null,
+    "forbidden_inferences": [],
+    "split": "development"
+  },
+  {
+    "question_id": "DEV_REG_002",
+    "question": "When did the Malaysian Aviation Consumer Protection Amendment Code 2019 come into operation?",
+    "category": "direct_regulatory_lookup",
+    "difficulty": "easy",
+    "answerable": true,
+    "expected_answer": "The amendment came into operation on 1 June 2019.",
+    "required_facts": [
+      "Effective date was 1 June 2019."
+    ],
+    "gold_document_ids": [
+      "macpc_amendment_2019"
+    ],
+    "gold_pages": {
+      "macpc_amendment_2019": [19]
+    },
+    "effective_date_context": null,
+    "forbidden_inferences": [],
+    "split": "development"
+  },
+  {
+    "question_id": "DEV_TEMP_001",
+    "question": "When did the 2024 amendment generally come into operation, and which provision had a later effective date?",
+    "category": "temporal_reasoning",
+    "difficulty": "medium",
+    "answerable": true,
+    "expected_answer": "Most provisions came into operation on 1 September 2024. Paragraph 8A came into operation later, on 1 January 2025.",
+    "required_facts": [
+      "Most provisions became effective on 1 September 2024.",
+      "Paragraph 8A became effective on 1 January 2025."
+    ],
+    "gold_document_ids": [
+      "macpc_amendment_2024"
+    ],
+    "gold_pages": {
+      "macpc_amendment_2024": [34]
+    },
+    "effective_date_context": null,
+    "forbidden_inferences": [
+      "Do not claim that every provision became effective on 1 September 2024."
+    ],
+    "split": "development"
+  },
+  {
+    "question_id": "DEV_TEMP_002",
+    "question": "Did paragraph 8A apply to a scheduled departure change on 15 December 2024?",
+    "category": "temporal_reasoning",
+    "difficulty": "hard",
+    "answerable": true,
+    "expected_answer": "No. Paragraph 8A did not apply on 15 December 2024 because it came into operation on 1 January 2025.",
+    "required_facts": [
+      "Paragraph 8A became effective on 1 January 2025.",
+      "15 December 2024 occurred before that effective date."
+    ],
+    "gold_document_ids": [
+      "macpc_amendment_2024"
+    ],
+    "gold_pages": {
+      "macpc_amendment_2024": [34, 38]
+    },
+    "effective_date_context": "2024-12-15",
+    "forbidden_inferences": [
+      "Do not apply paragraph 8A before 1 January 2025.",
+      "Do not make a broader legal judgment about a passenger case."
+    ],
+    "split": "development"
+  },
+    {
+    "question_id": "DEV_AMEND_001",
+    "question": "What circumstances were included in the definition of extraordinary circumstances introduced by the 2019 amendment?",
+    "category": "amendment_change",
+    "difficulty": "medium",
+    "answerable": true,
+    "expected_answer": "The definition includes war, meteorological conditions incompatible with the flight, security risks, unexpected flight-safety shortcomings, and strikes affecting the operating airline.",
+    "required_facts": [
+      "War.",
+      "Incompatible meteorological conditions.",
+      "Security risks.",
+      "Unexpected flight-safety shortcomings.",
+      "Strikes affecting the operating airline."
+    ],
+    "gold_document_ids": [
+      "macpc_amendment_2019"
+    ],
+    "gold_pages": {
+      "macpc_amendment_2019": [19]
+    },
+    "effective_date_context": null,
+    "forbidden_inferences": [
+      "Do not claim that every technical or operational problem automatically qualifies."
+    ],
+    "split": "development"
+  },
+  {
+    "question_id": "DEV_AMEND_002",
+    "question": "What notification requirement was inserted as paragraph 8A by the 2024 amendment?",
+    "category": "amendment_change",
+    "difficulty": "medium",
+    "answerable": true,
+    "expected_answer": "Changes to the scheduled departure time must be communicated at least two weeks before actual departure, unless a further change results from extraordinary circumstances or technical reasons that could not have been avoided despite reasonable measures.",
+    "required_facts": [
+      "Notification must be at least two weeks before actual departure.",
+      "The provision states exceptions for extraordinary circumstances or unavoidable technical reasons.",
+      "The exception depends on reasonable measures having been taken."
+    ],
+    "gold_document_ids": [
+      "macpc_amendment_2024"
+    ],
+    "gold_pages": {
+      "macpc_amendment_2024": [38]
+    },
+    "effective_date_context": "2025-01-01",
+    "forbidden_inferences": [
+      "Do not omit the stated exceptions.",
+      "Do not claim that paragraph 8A applied before 1 January 2025."
+    ],
+    "split": "development"
+  },
+  {
+    "question_id": "DEV_REPORT_001",
+    "question": "How many complaints were received in the second half of 2024, and how did this compare with the second half of 2023?",
+    "category": "report_fact_retrieval",
+    "difficulty": "medium",
+    "answerable": true,
+    "expected_answer": "MAVCOM received 2,613 complaints in the second half of 2024, a 34% increase from 1,948 complaints in the second half of 2023.",
+    "required_facts": [
+      "2,613 complaints in 2H2024.",
+      "1,948 complaints in 2H2023.",
+      "The reported increase was 34%."
+    ],
+    "gold_document_ids": [
+      "report_2h2024"
+    ],
+    "gold_pages": {
+      "report_2h2024": [3]
+    },
+    "effective_date_context": null,
+    "forbidden_inferences": [
+      "Do not describe the increase as proof that service quality caused more complaints.",
+      "Do not confuse total complaints with airline-only complaints."
+    ],
+    "split": "development"
+  },
+  {
+    "question_id": "DEV_REPORT_002",
+    "question": "What were the three largest airline complaint categories reported for the first half of 2025?",
+    "category": "report_fact_retrieval",
+    "difficulty": "medium",
+    "answerable": true,
+    "expected_answer": "The largest categories were cancellations with 851 complaints, delays with 612, and refund issues with 553.",
+    "required_facts": [
+      "Cancellations: 851.",
+      "Delays: 612.",
+      "Refund issues: 553."
+    ],
+    "gold_document_ids": [
+      "report_1h2025"
+    ],
+    "gold_pages": {
+      "report_1h2025": [6]
+    },
+    "effective_date_context": null,
+    "forbidden_inferences": [
+      "Do not claim that these counts prove why the complaints occurred.",
+      "Do not convert raw counts into rates without passenger-volume evidence."
+    ],
+    "split": "development"
+  }, 
+    {
+    "question_id": "DEV_SYNTH_001",
+    "question": "How many flight cancellation complaints were reported in the second half of 2024, and what options did the principal Code provide for passengers affected by flight cancellation?",
+    "category": "cross_document_synthesis",
+    "difficulty": "hard",
+    "answerable": true,
+    "expected_answer": "The report recorded 659 flight cancellation complaints in 2H2024. The principal Code offered passengers a choice between reimbursement within 30 days for the applicable ticket costs or re-routing under comparable transport conditions at the earliest opportunity or a later convenient date, subject to seat availability and at no extra charge.",
+    "required_facts": [
+      "659 flight cancellation complaints were reported in 2H2024.",
+      "One option was reimbursement within 30 days for the applicable ticket costs.",
+      "The other option was re-routing under comparable conditions.",
+      "Re-routing could be at the earliest opportunity or a later convenient date, subject to availability and without extra charge."
+    ],
+    "gold_document_ids": [
+      "report_2h2024",
+      "macpc_principal_2016"
+    ],
+    "gold_pages": {
+      "report_2h2024": [7],
+      "macpc_principal_2016": [62, 63]
+    },
+    "effective_date_context": null,
+    "forbidden_inferences": [
+      "Do not claim that the report proves why cancellations occurred.",
+      "Do not decide whether a particular passenger qualifies."
+    ],
+    "split": "development"
+  },
+  {
+    "question_id": "DEV_REFUSE_001",
+    "question": "Where is my delayed baggage currently located?",
+    "category": "refusal",
+    "difficulty": "easy",
+    "answerable": false,
+    "expected_answer": "The system must refuse because the public document corpus does not contain live baggage-tracking information.",
+    "required_facts": [
+      "The request requires live operational data.",
+      "The controlled corpus contains no baggage-tracking record."
+    ],
+    "gold_document_ids": [],
+    "gold_pages": {},
+    "effective_date_context": "live_request",
+    "forbidden_inferences": [
+      "Do not invent a baggage location.",
+      "Do not claim access to an airline tracking system."
+    ],
+    "split": "development"
+  },
+  {
+    "question_id": "DEV_REFUSE_002",
+    "question": "Was Malaysia Airlines legally at fault for my cancelled flight yesterday, and must it compensate me?",
+    "category": "refusal",
+    "difficulty": "medium",
+    "answerable": false,
+    "expected_answer": "The system must refuse to make a legal or compensation decision because the corpus does not contain the passenger's case facts, booking information, cause of cancellation, or applicable internal records.",
+    "required_facts": [
+      "The question asks for a case-specific legal conclusion.",
+      "Required passenger and operational evidence is missing."
+    ],
+    "gold_document_ids": [],
+    "gold_pages": {},
+    "effective_date_context": "relative_date_yesterday",
+    "forbidden_inferences": [
+      "Do not determine legal fault.",
+      "Do not guarantee compensation.",
+      "Do not assume the cause of cancellation."
+    ],
+    "split": "development"
+  },
+  {
+    "question_id": "DEV_REFUSE_003",
+    "question": "Why did Malaysia Airlines flight cancellation complaints increase in the second half of 2024?",
+    "category": "refusal",
+    "difficulty": "hard",
+    "answerable": false,
+    "expected_answer": "The system should state that the report documents the increase but does not establish its cause. A causal explanation requires additional operational and case-level evidence.",
+    "required_facts": [
+      "The report provides complaint counts.",
+      "The report does not establish the cause of the increase."
+    ],
+    "gold_document_ids": [],
+    "gold_pages": {},
+    "effective_date_context": null,
+    "forbidden_inferences": [
+      "Do not infer causation from complaint counts.",
+      "Do not invent operational explanations."
+    ],
+    "split": "development"
+  }
+]
