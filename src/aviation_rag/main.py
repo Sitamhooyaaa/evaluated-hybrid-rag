@@ -1,6 +1,9 @@
 """Production FastAPI application entry point."""
 
 import os
+import json
+import logging
+import time
 from collections.abc import Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -14,6 +17,7 @@ from aviation_rag.runtime import (
     build_runtime_answer_service,
 )
 
+logger = logging.getLogger("uvicorn.error")
 
 def create_production_app(
     project_root: Path | None = None,
@@ -26,6 +30,7 @@ def create_production_app(
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
+        started_at = time.perf_counter()
         api_key = os.getenv("GEMINI_API_KEY")
 
         if not api_key:
@@ -75,6 +80,25 @@ def create_production_app(
                 / "generation_config_dev_v2.json"
             ),
             gemini_client=gemini_client,
+        )
+
+        startup_duration_ms = round(
+            (
+                time.perf_counter()
+                - started_at
+            )
+            * 1000,
+            3,
+        )
+
+        logger.info(
+            json.dumps(
+                {
+                    "event": "application_startup_completed",
+                    "duration_ms": startup_duration_ms,
+                },
+                separators=(",", ":"),
+            )
         )
 
         try:

@@ -3,7 +3,6 @@
 import hashlib
 import json
 from pathlib import Path
-from pyexpat.errors import messages
 from typing import Any
 
 import pandas as pd
@@ -232,24 +231,25 @@ def build_runtime_answer_service(
     )
 
     raw_generator = partial(
-    generate_with_gemini,
-    client=gemini_client,
-    model=generation_config["model"],
-    temperature=generation_config["temperature"],
-    max_output_tokens=generation_config[
-        "max_output_tokens"
-    ],
-    thinking_budget=generation_config[
-        "thinking_budget"
-    ],
-)
+        generate_with_gemini,
+        client=gemini_client,
+        model=generation_config["model"],
+        temperature=generation_config["temperature"],
+        max_output_tokens=generation_config[
+            "max_output_tokens"
+        ],
+        thinking_budget=generation_config[
+            "thinking_budget"
+        ],
+    )
+
     def generator(
-    messages: list[dict[str, str]],
+        messages: list[dict[str, str]],
     ) -> dict[str, Any]:
         return call_with_retry(
-        operation=lambda: raw_generator(messages),
-        max_attempts=retry_max_attempts,
-        base_wait_seconds=retry_base_wait_seconds,
+            operation=lambda: raw_generator(messages),
+            max_attempts=retry_max_attempts,
+            base_wait_seconds=retry_base_wait_seconds,
     )
 
     return build_answer_service(

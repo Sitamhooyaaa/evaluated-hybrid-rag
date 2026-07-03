@@ -3,12 +3,18 @@
 from collections.abc import Callable
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field, field_validator
 from aviation_rag.gemini import GeminiServiceError
 
+import json
+import logging
+import time
+import uuid
+
 
 AnswerService = Callable[[str], dict[str, Any]]
+logger = logging.getLogger("uvicorn.error")
 
 
 class AskRequest(BaseModel):
@@ -52,6 +58,69 @@ def create_app(
     )
 
     app.state.answer_service = answer_service
+
+    @app.middleware("http")
+    async def log_http_request(
+        request: Request,
+        call_next,
+    ):
+        request_id = uuid.uuid4().hex
+        started_at = time.perf_counter()
+
+        try:
+            response = await call_next(request)
+        except Exception as error:
+            duration_ms = round(
+                (
+                    time.perf_counter()
+                    - started_at
+                )
+                * 1000,
+                3,
+            )
+
+            logger.exception(
+                json.dumps(
+                    {
+                        "event": "http_request_failed",
+                        "request_id": request_id,
+                        "method": request.method,
+                        "path": request.url.path,
+                        "status_code": 500,
+                        "duration_ms": duration_ms,
+                        "error_type": type(error).__name__,
+                    },
+                    separators=(",", ":"),
+                )
+            )
+            raise
+
+        duration_ms = round(
+            (
+                time.perf_counter()
+                - started_at
+            )
+            * 1000,
+            3,
+        )
+
+        response.headers["X-Request-ID"] = request_id
+
+        logger.info(
+            json.dumps(
+                {
+                    "event": "http_request_completed",
+                    "request_id": request_id,
+                    "method": request.method,
+                    "path": request.url.path,
+                    "status_code": response.status_code,
+                    "duration_ms": duration_ms,
+                },
+                separators=(",", ":"),
+            )
+        )
+
+        return response
 
     @app.get("/health")
     def health_check() -> dict[str, str]:

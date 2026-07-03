@@ -1,6 +1,8 @@
 from pathlib import Path
 
 import pytest
+import json
+import logging
 from fastapi.testclient import TestClient
 
 from aviation_rag.main import create_production_app
@@ -9,6 +11,7 @@ from aviation_rag.main import create_production_app
 def test_production_app_builds_service_at_startup(
     tmp_path: Path,
     monkeypatch,
+    caplog,
 ) -> None:
     monkeypatch.setenv(
         "GEMINI_API_KEY",
@@ -61,11 +64,24 @@ def test_production_app_builds_service_at_startup(
         service_builder=fake_service_builder,
     )
 
-    with TestClient(app) as client:
-        response = client.post(
-            "/ask",
-            json={"question": "What is the rule?"},
-        )
+    with caplog.at_level(
+        logging.INFO,
+        logger="uvicorn.error",
+    ):
+        with TestClient(app) as client:
+            response = client.post(
+                "/ask",
+                json={"question": "What is the rule?"},
+            )
+    startup_logs = [
+        json.loads(record.message)
+        for record in caplog.records
+        if '"event":"application_startup_completed"'
+        in record.message
+    ]
+
+    assert len(startup_logs) == 1
+    assert startup_logs[0]["duration_ms"] >= 0
 
     assert response.status_code == 200
     assert response.json()["answer"] == (

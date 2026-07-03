@@ -191,7 +191,7 @@ python -m pytest -q
 Current result:
 
 ```text
-114 passed
+115 passed
 ```
 
 Tests use temporary files, fake embedding models and fake Gemini clients. They do not require the local corpus or consume API quota.
@@ -221,13 +221,23 @@ The API validates input, reuses startup-managed RAG resources, retries temporary
 
 ### Local Runtime Measurement
 
-One local Windows run measured:
+Local Windows smoke tests measured:
 
-- cold startup: approximately 20 seconds
+- cold startup: approximately 16 to 20 seconds
 - health request: approximately 172 milliseconds through PowerShell
 - complete `/ask` request: approximately 2.26 seconds
 
 These are diagnostic measurements from one machine, not performance guarantees. Persisted document embeddings remove repeated encoding of all 368 chunks. The cold start still includes loading the BGE model because new user questions require query embeddings.
+
+### Structured Runtime Logging
+
+The API emits JSON events through Uvicorn's application logger:
+
+- `application_startup_completed` with startup duration
+- `http_request_completed` with request ID, method, path, status and duration
+- `http_request_failed` with request ID, status, duration and exception type
+
+Logs intentionally exclude raw questions, retrieved evidence, prompts, generated answers and API keys. This preserves operational visibility without creating a second sensitive dataset.
 
 ## Reproducibility and Integrity
 
@@ -246,6 +256,7 @@ These are diagnostic measurements from one machine, not performance guarantees. 
 - BGE model loading still produces an approximately 20-second local cold start
 - Gemini quota can make generation unavailable
 - no authentication, rate limiting or load testing
+- logging is local and has no centralized retention or monitoring backend
 - cross-document synthesis remains weak
 - cross-page provisions can lose context
 - manual scoring contains reviewer judgment

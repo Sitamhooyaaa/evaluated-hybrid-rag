@@ -2,6 +2,8 @@ from fastapi.testclient import TestClient
 
 from aviation_rag.api import create_app
 from aviation_rag.gemini import GeminiServiceError
+import json
+import logging
 
 
 def test_health_check_returns_ok() -> None:
@@ -128,3 +130,57 @@ def test_ask_returns_503_when_gemini_fails() -> None:
             "Generation service is temporarily unavailable"
         )
     }
+
+def test_request_logging_excludes_question_text(
+    caplog,
+) -> None:
+    secret_question = (
+        "My private booking reference is ABC123"
+    )
+
+    def fake_answer_service(question: str) -> dict:
+        return {
+            "answer": "Test answer.",
+            "citation_check": {
+                "cited_sources": [],
+                "invalid_citations": [],
+                "malformed_citations": [],
+            },
+        }
+
+    client = TestClient(
+        create_app(
+            answer_service=fake_answer_service,
+        )
+    )
+
+    with caplog.at_level(
+        logging.INFO,
+        logger="uvicorn.error",
+    ):
+        response = client.post(
+            "/ask",
+            json={"question": secret_question},
+        )
+
+    request_logs = [
+        json.loads(record.message)
+        for record in caplog.records
+        if '"event":"http_request_completed"'
+        in record.message
+    ]
+
+    assert response.status_code == 200
+    assert len(request_logs) == 1
+
+    request_log = request_logs[0]
+
+    assert request_log["method"] == "POST"
+    assert request_log["path"] == "/ask"
+    assert request_log["status_code"] == 200
+    assert request_log["duration_ms"] >= 0
+    assert request_log["request_id"]
+    assert response.headers["X-Request-ID"] == (
+        request_log["request_id"]
+    )
+    assert secret_question not in caplog.text
