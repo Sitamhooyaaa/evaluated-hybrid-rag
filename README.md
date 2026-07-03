@@ -46,18 +46,34 @@ Document IDs, URLs, filenames, access dates, extraction methods and SHA-256 valu
 
 ## System Design
 
-```text
-Official documents downloaded locally
--> extraction and cleaning
--> page metadata and exclusions
--> 140-word page-bounded chunks
--> TF-IDF retrieval + BGE retrieval
--> weighted reciprocal rank fusion
--> top-five evidence context
--> Gemini generation
--> citation validation
--> FastAPI response
+```mermaid
+flowchart LR
+    pdfs["Official PDFs"] --> ingestion["Extraction and Cleaning"]
+    ingestion --> pages["Page Records and Exclusions"]
+    pages --> chunks["140-word Page-bounded Chunks"]
+
+    question["Analyst Question"] --> api["POST /ask"]
+    api --> answerService["Answer Service"]
+
+    chunks --> tfidf["TF-IDF Retrieval"]
+    chunks --> embeddingBuild["BGE Document Encoding"]
+    embeddingBuild --> embeddingArtifact["Persisted Embedding Artifact"]
+    embeddingArtifact --> semantic["Semantic Retrieval"]
+
+    answerService --> tfidf
+    answerService --> queryEncoder["BGE Query Encoding"]
+    queryEncoder --> semantic
+
+    tfidf --> rrf["Weighted Reciprocal Rank Fusion"]
+    semantic --> rrf
+    rrf --> context["Top-five Evidence Context"]
+    context --> prompt["Grounded Prompt"]
+    prompt --> gemini["Gemini 3.5 Flash"]
+    gemini --> citations["Citation Validation"]
+    citations --> response["Answer or Refusal"]
 ```
+
+The offline flow creates local corpus artifacts once. The online flow reuses those artifacts for each question and encodes only the new query. The public image excludes PDFs, chunks, embeddings and secrets; Docker Compose supplies the required local artifacts at runtime.
 
 Selected retrieval configuration:
 
