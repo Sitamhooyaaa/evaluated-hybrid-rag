@@ -175,9 +175,12 @@ Build derived datasets:
 ```powershell
 aviation-rag-build-pages --project-root .
 aviation-rag-build-chunks --project-root .
+aviation-rag-build-embeddings --project-root .
 ```
 
 Expected totals are 201 pages, 186 eligible pages and 368 chunks.
+
+The embedding command creates a local normalized BGE matrix and metadata under `artifacts/`. The metadata records the model, matrix shape, chunk-dataset SHA-256 and embedding-file SHA-256. Startup rejects stale, reordered, corrupted or wrong-model artifacts.
 
 ## Tests
 
@@ -188,7 +191,7 @@ python -m pytest -q
 Current result:
 
 ```text
-104 passed
+114 passed
 ```
 
 Tests use temporary files, fake embedding models and fake Gemini clients. They do not require the local corpus or consume API quota.
@@ -216,6 +219,16 @@ Endpoints:
 
 The API validates input, reuses startup-managed RAG resources, retries temporary provider failures, rejects invalid citation attempts and maps provider failures to HTTP 503.
 
+### Local Runtime Measurement
+
+One local Windows run measured:
+
+- cold startup: approximately 20 seconds
+- health request: approximately 172 milliseconds through PowerShell
+- complete `/ask` request: approximately 2.26 seconds
+
+These are diagnostic measurements from one machine, not performance guarantees. Persisted document embeddings remove repeated encoding of all 368 chunks. The cold start still includes loading the BGE model because new user questions require query embeddings.
+
 ## Reproducibility and Integrity
 
 - raw and derived corpus files are excluded from Git
@@ -225,11 +238,12 @@ The API validates input, reuses startup-managed RAG resources, retries temporary
 - retrieval configuration was frozen before locked evaluation
 - notebook outputs are cleared before publication
 - ranking artifacts retain IDs, pages, scores and labels without text
+- persisted embeddings are validated against the ordered chunk dataset and embedding-file hashes
 
 ## Limitations
 
 - document use and redistribution terms must be reviewed by each user
-- BGE embeddings are recomputed at server startup
+- BGE model loading still produces an approximately 20-second local cold start
 - Gemini quota can make generation unavailable
 - no authentication, rate limiting or load testing
 - cross-document synthesis remains weak
@@ -240,11 +254,10 @@ The API validates input, reuses startup-managed RAG resources, retries temporary
 
 ## Remaining Work
 
-1. Persist semantic embeddings to reduce startup time.
-2. Add deployment-readiness checks and runtime logging.
-3. Package a local bring-your-own-data Docker workflow.
-4. Add an architecture diagram and portfolio screenshots.
-5. Complete the final repository audit.
+1. Add deployment-readiness checks and runtime logging.
+2. Package a local bring-your-own-data Docker workflow.
+3. Add an architecture diagram and portfolio screenshots.
+4. Complete the final repository audit.
 
 ## Document Rights
 

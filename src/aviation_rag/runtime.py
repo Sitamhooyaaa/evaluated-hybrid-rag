@@ -14,7 +14,11 @@ from aviation_rag.retrieval import (
     SemanticRetriever,
     TfidfRetriever,
 )
+import numpy as np
 
+from aviation_rag.embedding_artifacts import (
+    load_embedding_artifact,
+)
 from collections.abc import Callable
 from functools import partial
 
@@ -127,6 +131,7 @@ def build_hybrid_retriever(
     chunks: pd.DataFrame,
     config: dict[str, Any],
     semantic_model: Any,
+    chunk_embeddings: np.ndarray | None = None,
 ) -> HybridRetriever:
     """Build the evaluated hybrid retriever."""
 
@@ -141,6 +146,7 @@ def build_hybrid_retriever(
         query_prefix=semantic_config[
             "query_instruction"
         ],
+        chunk_embeddings=chunk_embeddings,
     )
 
     return HybridRetriever(
@@ -173,6 +179,8 @@ def build_answer_service(
 
 def build_runtime_answer_service(
     chunks_path: Path,
+    embeddings_path: Path,
+    embedding_metadata_path: Path,
     retrieval_config_path: Path,
     generation_config_path: Path,
     gemini_client: Any,
@@ -209,10 +217,18 @@ def build_runtime_answer_service(
 
     semantic_model = semantic_model_loader(model_name)
 
+    chunk_embeddings = load_embedding_artifact(
+    chunks=chunks,
+    expected_model_name=model_name,
+    embeddings_path=embeddings_path,
+    metadata_path=embedding_metadata_path,
+    )
+
     retriever = build_hybrid_retriever(
         chunks=chunks,
         config=retrieval_config,
         semantic_model=semantic_model,
+        chunk_embeddings=chunk_embeddings,
     )
 
     raw_generator = partial(

@@ -1,6 +1,7 @@
 """Retrieval methods for aviation RAG documents."""
 
 import pandas as pd
+import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from typing import Any
@@ -87,6 +88,7 @@ class SemanticRetriever:
         model: Any,
         query_prefix: str = "",
         batch_size: int = 32,
+        chunk_embeddings: np.ndarray | None = None,
     ) -> None:
         missing_columns = (
             REQUIRED_CHUNK_COLUMNS - set(chunks.columns)
@@ -105,15 +107,29 @@ class SemanticRetriever:
         self.model = model
         self.query_prefix = query_prefix
 
-        self.chunk_embeddings = (
-            self.model.encode_document(
+        if chunk_embeddings is None:
+            self.chunk_embeddings = self.model.encode_document(
                 self.chunks["chunk_text"].tolist(),
                 batch_size=batch_size,
                 show_progress_bar=False,
                 convert_to_numpy=True,
                 normalize_embeddings=True,
             )
-        )
+        else:
+            self.chunk_embeddings = np.asarray(
+                chunk_embeddings,
+                dtype=float,
+            )
+
+            if self.chunk_embeddings.ndim != 2:
+                raise ValueError(
+                    "Chunk embeddings must be a two-dimensional array"
+                )
+
+            if len(self.chunk_embeddings) != len(self.chunks):
+                raise ValueError(
+                    "Chunk embedding count must match chunk count"
+                )
 
     def retrieve(
         self,

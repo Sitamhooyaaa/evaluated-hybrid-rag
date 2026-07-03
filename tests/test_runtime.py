@@ -14,6 +14,10 @@ from aviation_rag.runtime import (
     build_runtime_answer_service,
 )
 
+from aviation_rag.embedding_artifacts import (
+    save_embedding_artifact,
+)
+
 from types import SimpleNamespace
 
 
@@ -117,6 +121,18 @@ class FakeSemanticModel:
         **kwargs,
     ):
         return np.array([[1.0, 0.0]])
+
+class QueryOnlySemanticModel(FakeSemanticModel):
+    """Allow query encoding but reject document re-encoding."""
+
+    def encode_document(
+        self,
+        texts,
+        **kwargs,
+    ):
+        raise AssertionError(
+            "Runtime must not re-encode document chunks"
+        )
 
 
 def valid_retrieval_config() -> dict:
@@ -253,6 +269,8 @@ def test_build_runtime_answer_service_without_real_api(
     chunks_path = tmp_path / "chunks.jsonl"
     retrieval_path = tmp_path / "retrieval.json"
     generation_path = tmp_path / "generation.json"
+    embeddings_path = tmp_path / "embeddings.npy"
+    embedding_metadata_path = tmp_path / "embeddings.json"
 
     chunks = pd.DataFrame(
         [
@@ -275,6 +293,20 @@ def test_build_runtime_answer_service_without_real_api(
         chunks_path,
         orient="records",
         lines=True,
+    )
+
+    save_embedding_artifact(
+    embeddings=np.array(
+        [
+            [1.0, 0.0],
+            [0.0, 1.0],
+        ],
+        dtype=np.float32,
+    ),
+    chunks=chunks,
+    model_name="fake-bge",
+    embeddings_path=embeddings_path,
+    metadata_path=embedding_metadata_path,
     )
 
     retrieval_config = valid_retrieval_config()
@@ -320,11 +352,13 @@ def test_build_runtime_answer_service_without_real_api(
 
     answer_service = build_runtime_answer_service(
         chunks_path=chunks_path,
+        embeddings_path=embeddings_path,
+        embedding_metadata_path=embedding_metadata_path,
         retrieval_config_path=retrieval_path,
         generation_config_path=generation_path,
         gemini_client=fake_client,
         semantic_model_loader=lambda name: (
-            FakeSemanticModel()
+            QueryOnlySemanticModel()
         ),
         retry_base_wait_seconds=0,
     )

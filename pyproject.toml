@@ -31,6 +31,7 @@ dev = [
 aviation-rag-build-pages = "aviation_rag.build_pages:main"
 aviation-rag-build-chunks = "aviation_rag.build_chunks:main"
 aviation-rag-summarize-answers = "aviation_rag.summarize_answers:main"
+aviation-rag-build-embeddings = "aviation_rag.build_embeddings:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

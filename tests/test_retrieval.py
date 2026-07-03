@@ -234,3 +234,61 @@ def test_hybrid_retriever_rejects_invalid_parameters(
             semantic_retriever=semantic_retriever,
             **invalid_parameters,
         )
+
+def test_semantic_retriever_accepts_precomputed_embeddings() -> None:
+    model = FakeEmbeddingModel()
+
+    precomputed_embeddings = np.array(
+        [
+            [1.0, 0.0],
+            [0.0, 1.0],
+        ]
+    )
+
+    retriever = SemanticRetriever(
+        chunks=make_chunks(),
+        model=model,
+        chunk_embeddings=precomputed_embeddings,
+    )
+
+    results = retriever.retrieve(
+        "flight cancellation",
+        top_k=2,
+    )
+
+    assert np.array_equal(
+        retriever.chunk_embeddings,
+        precomputed_embeddings,
+    )
+    assert results.iloc[0]["chunk_id"] == "chunk_a"
+
+def test_semantic_retriever_rejects_non_matrix_embeddings() -> None:
+    invalid_embeddings = np.array([1.0, 0.0])
+
+    with pytest.raises(
+        ValueError,
+        match="two-dimensional array",
+    ):
+        SemanticRetriever(
+            chunks=make_chunks(),
+            model=FakeEmbeddingModel(),
+            chunk_embeddings=invalid_embeddings,
+        )
+
+
+def test_semantic_retriever_rejects_wrong_embedding_count() -> None:
+    invalid_embeddings = np.array(
+        [
+            [1.0, 0.0],
+        ]
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="must match chunk count",
+    ):
+        SemanticRetriever(
+            chunks=make_chunks(),
+            model=FakeEmbeddingModel(),
+            chunk_embeddings=invalid_embeddings,
+        )

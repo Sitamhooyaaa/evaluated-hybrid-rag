@@ -54,6 +54,16 @@ def create_production_app(
                 / "processed"
                 / "chunks.jsonl"
             ),
+            embeddings_path=(
+                root
+                / "artifacts"
+                / "bge_chunk_embeddings.npy"
+            ),
+            embedding_metadata_path=(
+                root
+                / "artifacts"
+                / "bge_chunk_embeddings.json"
+            ),
             retrieval_config_path=(
                 root
                 / "evaluation"

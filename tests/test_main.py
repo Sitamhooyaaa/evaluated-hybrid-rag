@@ -41,6 +41,18 @@ def test_production_app_builds_service_at_startup(
             / "chunks.jsonl"
         )
 
+        assert kwargs["embeddings_path"] == (
+            tmp_path
+            / "artifacts"
+            / "bge_chunk_embeddings.npy"
+        )
+
+        assert kwargs["embedding_metadata_path"] == (
+            tmp_path
+            / "artifacts"
+            / "bge_chunk_embeddings.json"
+        )
+
         return fake_answer_service
 
     app = create_production_app(
