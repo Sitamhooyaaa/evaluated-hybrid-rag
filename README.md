@@ -1,6 +1,6 @@
 # Malaysian Aviation Consumer Protection RAG
 
-> Work in progress. The evaluated local RAG pipeline and FastAPI application are implemented. Docker packaging and final portfolio presentation remain.
+> Work in progress. The evaluated RAG pipeline, FastAPI application and local bring-your-own-data Docker workflow are implemented. Final portfolio presentation and audit remain.
 
 ## Problem
 
@@ -191,7 +191,7 @@ python -m pytest -q
 Current result:
 
 ```text
-115 passed
+118 passed
 ```
 
 Tests use temporary files, fake embedding models and fake Gemini clients. They do not require the local corpus or consume API quota.
@@ -239,6 +239,41 @@ The API emits JSON events through Uvicorn's application logger:
 
 Logs intentionally exclude raw questions, retrieved evidence, prompts, generated answers and API keys. This preserves operational visibility without creating a second sensitive dataset.
 
+## Local Docker Workflow
+
+The image contains application code and sanitized configuration only. Restricted source PDFs, extracted chunks, embeddings and `.env` are excluded from the build context and image.
+
+Build the CPU-only image:
+
+```powershell
+docker build -t malaysia-aviation-rag:local .
+```
+
+Start the local bring-your-own-data service:
+
+```powershell
+docker compose up -d
+```
+
+The Compose service mounts `chunks.jsonl` and the embedding directory read-only, injects `.env` at runtime, and persists the public BGE model cache in a named volume.
+
+Verified container behavior:
+
+- image inspection found no raw documents, processed text, embeddings or `.env`
+- health check reached `healthy`
+- one grounded answer returned the expected page citation
+- one live-data question was refused without citations
+- startup failed clearly when artifacts or the API key were missing
+- a replacement Compose container reused the model cache
+
+The local image is approximately 2.24 GB because the runtime includes CPU PyTorch and Sentence Transformers. This is acceptable for the v0 local prototype but unsuitable evidence of an optimized production image.
+
+Stop the service without deleting the model-cache volume:
+
+```powershell
+docker compose down
+```
+
 ## Reproducibility and Integrity
 
 - raw and derived corpus files are excluded from Git
@@ -257,6 +292,7 @@ Logs intentionally exclude raw questions, retrieved evidence, prompts, generated
 - Gemini quota can make generation unavailable
 - no authentication, rate limiting or load testing
 - logging is local and has no centralized retention or monitoring backend
+- local Docker image is approximately 2.24 GB
 - cross-document synthesis remains weak
 - cross-page provisions can lose context
 - manual scoring contains reviewer judgment
@@ -265,10 +301,9 @@ Logs intentionally exclude raw questions, retrieved evidence, prompts, generated
 
 ## Remaining Work
 
-1. Add deployment-readiness checks and runtime logging.
-2. Package a local bring-your-own-data Docker workflow.
-3. Add an architecture diagram and portfolio screenshots.
-4. Complete the final repository audit.
+1. Add an architecture diagram and portfolio screenshots.
+2. Complete the final repository and container audit.
+3. Decide whether a private deployment target is justified by interview needs and document rights.
 
 ## Document Rights
 

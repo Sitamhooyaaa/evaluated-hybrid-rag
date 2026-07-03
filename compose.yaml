@@ -1,0 +1,18 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: malaysia-aviation-rag:local
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data/processed/chunks.jsonl:/app/data/processed/chunks.jsonl:ro
+      - ./artifacts:/app/artifacts:ro
+      - huggingface_cache:/app/.cache/huggingface
+    init: true
+
+volumes:
+  huggingface_cache:
