@@ -1,4 +1,8 @@
-# Malaysian Aviation Consumer Protection RAG
+# Evaluated Hybrid RAG Assistant
+
+A from-scratch RAG learning project using Malaysian aviation consumer protection documents as the case study.
+
+This project does not use LangChain or a vector database. That was intentional. The goal was to learn and evaluate the core RAG components directly: ingestion, chunking, retrieval, prompt design, answer generation, citation checking, refusal behavior, and failure analysis.
 
 > Work in progress. The evaluated RAG pipeline, FastAPI application and local bring-your-own-data Docker workflow are implemented. Final portfolio presentation and audit remain.
 
